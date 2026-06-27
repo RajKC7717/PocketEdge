@@ -382,7 +382,13 @@ async function streamChatGemini(ws, message) {
       return;
     }
 
-    const errMsg = err.message || String(err);
+    let errMsg = err.message || String(err);
+    if (errMsg.includes('429 Too Many Requests') || errMsg.includes('Quota exceeded')) {
+      errMsg = 'Gemini API free tier quota exceeded. Please wait a minute and try again.';
+    } else if (errMsg.length > 200) {
+      errMsg = errMsg.substring(0, 200) + '... (truncated)';
+    }
+
     logger.error('AI', `[Gemini] Error: ${errMsg}`);
     sendAIError(ws, `Gemini error: ${errMsg}`);
   }

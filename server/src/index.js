@@ -11,6 +11,9 @@ const { handleConnection, getClients, setMessageHandler } = require('./handlers/
 const { handleTerminalMessage, terminalManager } = require('./handlers/terminalHandler');
 const { handleFileMessage, fileManager } = require('./handlers/fileHandler');
 const { handleAIMessage } = require('./handlers/aiHandler');
+const { handlePowerMessage } = require('./handlers/powerHandler');
+const { handleBrowserMessage } = require('./handlers/browserHandler');
+const { handleScreenMessage, screenManager } = require('./handlers/screenHandler');
 
 // ─── Express Setup ───────────────────────────────────────────────────────────
 
@@ -51,6 +54,15 @@ setMessageHandler((ws, clientId, message) => {
 
   // Try AI handler
   if (handleAIMessage(ws, clientId, message)) return;
+
+  // Try power handler
+  if (handlePowerMessage(ws, clientId, message)) return;
+
+  // Try browser handler
+  if (handleBrowserMessage(ws, clientId, message)) return;
+
+  // Try screen handler
+  if (handleScreenMessage(ws, clientId, message)) return;
 
   logger.warn('ROUTER', `Unhandled message type: ${message.type}`);
 });
@@ -187,6 +199,9 @@ function shutdown(signal) {
 
   // Kill all terminal sessions
   terminalManager.killAll();
+
+  // Kill all screen streams
+  screenManager.killAll();
 
   // Cleanup file watchers
   fileManager.cleanup();
